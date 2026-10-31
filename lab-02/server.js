@@ -14,8 +14,9 @@ const sqlite3 = require("sqlite3");
 
 const app = express();
 
-// Middleware to parse incoming JSON request bodies
+// Middleware to parse incoming JSON and urlencoded request bodies
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Server port configuration (configurable via environment variable)
 const PORT = process.env.PORT || 3000;
@@ -173,7 +174,30 @@ app.get(["/books/:bookId", "/books/:bookId/"], async (req, res) => {
  * Route: /books/ or /books
  */
 app.post(["/books", "/books/"], async (req, res) => {
+  // Validate that request body exists
+  if (!req.body || typeof req.body !== "object") {
+    return res.status(400).json({
+      error: "Validation failed",
+      details:
+        "Request body is missing. Ensure you are sending JSON data with 'Content-Type: application/json' header.",
+    });
+  }
+
   const { title, author, price, pages } = req.body;
+
+  // Flexible numeric parsing to support both number and numeric string types
+  const numericPrice =
+    typeof price === "number"
+      ? price
+      : price !== undefined && price !== null && price !== ""
+      ? Number(price)
+      : NaN;
+  const numericPages =
+    typeof pages === "number"
+      ? pages
+      : pages !== undefined && pages !== null && pages !== ""
+      ? Number(pages)
+      : NaN;
 
   // Validate request body fields
   if (
@@ -183,12 +207,10 @@ app.post(["/books", "/books/"], async (req, res) => {
     !author ||
     typeof author !== "string" ||
     author.trim() === "" ||
-    price === undefined ||
-    typeof price !== "number" ||
-    price < 0 ||
-    pages === undefined ||
-    typeof pages !== "number" ||
-    pages <= 0
+    isNaN(numericPrice) ||
+    numericPrice < 0 ||
+    isNaN(numericPages) ||
+    numericPages <= 0
   ) {
     return res.status(400).json({
       error: "Validation failed",
@@ -198,7 +220,7 @@ app.post(["/books", "/books/"], async (req, res) => {
   }
 
   try {
-    // Parameterized query using ? placeholders
+    // Parameterized query using ? placeholders prevents SQL Injection
     const addBookQuery = `
       INSERT INTO book (title, author, price, pages)
       VALUES (?, ?, ?, ?);
@@ -206,8 +228,8 @@ app.post(["/books", "/books/"], async (req, res) => {
     const result = await db.run(addBookQuery, [
       title.trim(),
       author.trim(),
-      price,
-      pages,
+      numericPrice,
+      numericPages,
     ]);
 
     res.status(201).json({
@@ -236,7 +258,30 @@ app.put(["/books/:bookId", "/books/:bookId/"], async (req, res) => {
     });
   }
 
+  // Validate that request body exists
+  if (!req.body || typeof req.body !== "object") {
+    return res.status(400).json({
+      error: "Validation failed",
+      details:
+        "Request body is missing. Ensure you are sending JSON data with 'Content-Type: application/json' header.",
+    });
+  }
+
   const { title, author, price, pages } = req.body;
+
+  // Flexible numeric parsing to support both number and numeric string types
+  const numericPrice =
+    typeof price === "number"
+      ? price
+      : price !== undefined && price !== null && price !== ""
+      ? Number(price)
+      : NaN;
+  const numericPages =
+    typeof pages === "number"
+      ? pages
+      : pages !== undefined && pages !== null && pages !== ""
+      ? Number(pages)
+      : NaN;
 
   // Validate request body fields
   if (
@@ -246,12 +291,10 @@ app.put(["/books/:bookId", "/books/:bookId/"], async (req, res) => {
     !author ||
     typeof author !== "string" ||
     author.trim() === "" ||
-    price === undefined ||
-    typeof price !== "number" ||
-    price < 0 ||
-    pages === undefined ||
-    typeof pages !== "number" ||
-    pages <= 0
+    isNaN(numericPrice) ||
+    numericPrice < 0 ||
+    isNaN(numericPages) ||
+    numericPages <= 0
   ) {
     return res.status(400).json({
       error: "Validation failed",
@@ -271,7 +314,7 @@ app.put(["/books/:bookId", "/books/:bookId/"], async (req, res) => {
       });
     }
 
-    // Parameterized query using ? placeholders
+    // Parameterized query using ? placeholders prevents SQL Injection
     const updateBookQuery = `
       UPDATE book
       SET title = ?, author = ?, price = ?, pages = ?
@@ -280,8 +323,8 @@ app.put(["/books/:bookId", "/books/:bookId/"], async (req, res) => {
     await db.run(updateBookQuery, [
       title.trim(),
       author.trim(),
-      price,
-      pages,
+      numericPrice,
+      numericPages,
       parsedId,
     ]);
 
