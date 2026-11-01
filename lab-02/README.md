@@ -14,8 +14,7 @@
 
 ## Live Link
 
-- **Live URL:** *Not applicable / Pending manual cloud deployment* (See [Deployment Instructions](#deployment-preparation--hosting-options) below)
-- *Note:* SQLite uses local file-based storage. Deploying on free-tier platforms (such as Render Free Tier) provides ephemeral storage where database writes reset upon container restarts. Step-by-step instructions for deploying a separate Render web service without altering Lab 1 are documented below.
+- **Live URL:** https://backend-fundamentals-lab-02.onrender.com
 
 ---
 
