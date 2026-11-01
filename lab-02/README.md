@@ -442,12 +442,12 @@ Displays all books retrieved from the SQLite database.
 ### 2. GET Book by ID (`/books/1/`)
 Displays a single book record with ID 1.
 
-![GET Book by ID](screenshots/02-get-book-by-id.png)
+![GET Book by ID](screenshots/02-get-book-by-id)
 
 ### 3. POST Add New Book (`/books/`)
 Displays the 201 Created response containing `message` and `bookId`.
 
-![POST Add Book](screenshots/03-post-add-book.png)
+![POST Add Book](screenshots/03-post-add-book)
 
 ### 4. PUT Update Book (`/books/11/`)
 Displays the 200 OK response confirming the book was updated.
